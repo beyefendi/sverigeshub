@@ -5,7 +5,7 @@ import json
 import pandas as pd
 # from pandas.json import json_normalize  
 from sklearn import preprocessing
-
+import numpy as np
 
 def generateTOTP(totp_secret):
     totp = pyotp.TOTP(totp_secret, digest=hashlib.sha1)
@@ -13,12 +13,12 @@ def generateTOTP(totp_secret):
     # print(totp_code)
     return totp_code
 
-totp_code = generateTOTP('your secret')
+totp_code = generateTOTP('ILQT2JKA5Z6NLZPBL25HPUAN6TXMJAWC')
 
 avanza = Avanza({
-    'username': 'your user id',
-    'password': 'your password',
-    'totpSecret': 'your secret'
+    'username': 'jg97455022',
+    'password': 'llE60kIDyJ',
+    'totpSecret': 'ILQT2JKA5Z6NLZPBL25HPUAN6TXMJAWC'
 })
 
 def pp_json(json_dict):
@@ -33,12 +33,12 @@ def get_change(current, previous):
     try:
         return ((current - previous) / previous) * 100.0
     except ZeroDivisionError:
-        return float('inf')
+        return 0
 
 def get_orderbooks_by_name(data, name_key):
     for item in data:
         if item['name'] == name_key:
-            return item['orderbooks']
+            return item['orderbookIds']
     return None
 
 def extract_selected_values(data):
@@ -48,6 +48,14 @@ def extract_selected_values(data):
     # Select the specific columns: 'name', 
     selected_columns = ['listing.shortName', 'keyIndicators.marketCapital.value', 'quote.totalVolumeTraded', 'quote.totalValueTraded', 'keyIndicators.netMargin', 'keyIndicators.priceEarningsRatio', 'keyIndicators.returnOnEquity', 'keyIndicators.earningsPerShare.value', 'keyIndicators.numberOfOwners', 'historicalClosingPrices.oneDay', 'historicalClosingPrices.startOfYear', 'historicalClosingPrices.oneYear', 'historicalClosingPrices.threeYears', 'historicalClosingPrices.fiveYears']
     
+    # Handle non-existing columns (For example: threeYears data is not exist for 1 year old stock)
+    for col in selected_columns:
+        if col not in df.columns:
+            #df.insert(0, col, 1)
+            #df = df.assign(col=0)
+            df[col] = 0
+    # df.replace([np.inf, -np.inf], -1, inplace=True)
+
     # Extract the selected columns into a new DataFrame
     result_df = df[selected_columns]
     
@@ -96,8 +104,6 @@ def extract_selected_values(data):
     result_df['Perf 3Y'] = result_df['Perf 3Y'].map("{:,.0f}".format)
     result_df['Perf 5Y'] = result_df['Perf 5Y'].map("{:,.0f}".format)
 
-  
-
     # Print the resulting DataFrame
     return result_df
 
@@ -116,7 +122,7 @@ def normalize_basic(df):
     return df
 
 watchlist = avanza.get_watchlists()
-wl = "High interested"
+wl = "2 SE high interest"
 stock_ids = get_orderbooks_by_name(watchlist, wl)
 # print(stock_ids) # For debugging
 
@@ -132,9 +138,9 @@ for stock_id in stock_ids:
     
     final_df = pd.concat([final_df, pd.DataFrame(df)], ignore_index=True)
 
-final_df = normalize_basic(final_df)
+# final_df = normalize_basic(final_df)
 
 # print(final_df) # For debugging
 final_df.to_csv(wl+'-omx.analysis.csv', sep=';', index=False)
 
-# @TODO: HAndle potential non-existing columns
+# @TODO: P/E normailization should be in the reverse order
