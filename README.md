@@ -5,4 +5,6 @@ These tools contain functionalities that will likely make life in Sweden easier.
 
 ---
 
-- [Car search on blocket.se](carsearch/)
+- [Find Stock  - avanza.se](stocksearch/)
+- [Find Apartment - bostad.stockholm.se](aptsearch)
+- [Find Car - blocket.se](carsearch/)
