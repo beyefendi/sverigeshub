@@ -13,12 +13,12 @@ def generateTOTP(totp_secret):
     # print(totp_code)
     return totp_code
 
-totp_code = generateTOTP('ILQT2JKA5Z6NLZPBL25HPUAN6TXMJAWC')
+totp_code = generateTOTP('yourcode')
 
 avanza = Avanza({
-    'username': 'jg97455022',
-    'password': 'llE60kIDyJ',
-    'totpSecret': 'ILQT2JKA5Z6NLZPBL25HPUAN6TXMJAWC'
+    'username': 'yourusername',
+    'password': 'yourpassword',
+    'totpSecret': 'yoursecret'
 })
 
 def pp_json(json_dict):
