@@ -3,29 +3,33 @@ import pyotp
 from avanza import Avanza, TimePeriod
 import json
 import pandas as pd
-# from pandas.json import json_normalize  
 from sklearn import preprocessing
 import numpy as np
+import configparser
+
+# Read credentials from config file
+config = configparser.ConfigParser()
+config.read('stock.conf')
+
+username = config.get('credentials', 'username')
+password = config.get('credentials', 'password')
+totp_secret = config.get('credentials', 'totpSecret')
 
 def generateTOTP(totp_secret):
     totp = pyotp.TOTP(totp_secret, digest=hashlib.sha1)
     totp_code = totp.now()
-    # print(totp_code)
     return totp_code
 
-totp_code = generateTOTP('ILQT2JKA5Z6NLZPBL25HPUAN6TXMJAWC')
+totp_code = generateTOTP(totp_secret)
 
 avanza = Avanza({
-    'username': 'jg97455022',
-    'password': 'llE60kIDyJ',
-    'totpSecret': 'ILQT2JKA5Z6NLZPBL25HPUAN6TXMJAWC'
+    'username': username,
+    'password': password,
+    'totpSecret': totp_secret
 })
 
 def pp_json(json_dict):
     print(json.dumps(json_dict, indent=2))
-
-# overview = avanza.get_overview()
-# pp_json(overview)
 
 def get_change(current, previous):
     if current == previous:
@@ -45,7 +49,7 @@ def extract_selected_values(data):
     # Use json_normalize to flatten the JSON object
     df = pd.json_normalize(data)
     
-    # Select the specific columns: 'name', 
+    # Select the specific columns: 'listing.shortName', 
     selected_columns = ['listing.shortName', 'keyIndicators.marketCapital.value', 'quote.totalVolumeTraded', 'quote.totalValueTraded', 'keyIndicators.netMargin', 'keyIndicators.priceEarningsRatio', 'keyIndicators.returnOnEquity', 'keyIndicators.earningsPerShare.value', 'keyIndicators.numberOfOwners', 'historicalClosingPrices.oneDay', 'historicalClosingPrices.startOfYear', 'historicalClosingPrices.oneYear', 'historicalClosingPrices.threeYears', 'historicalClosingPrices.fiveYears']
     
     # Handle non-existing columns (For example: threeYears data is not exist for 1 year old stock)
@@ -122,7 +126,11 @@ def normalize_basic(df):
     return df
 
 watchlist = avanza.get_watchlists()
+wl = "0 US stocks"
+wl = "1 EU stocks"
 wl = "2 SE high interest"
+# wl = "3 SE good performance"
+# wl = "5 SE low interest"
 stock_ids = get_orderbooks_by_name(watchlist, wl)
 # print(stock_ids) # For debugging
 
@@ -141,6 +149,6 @@ for stock_id in stock_ids:
 # final_df = normalize_basic(final_df)
 
 # print(final_df) # For debugging
-final_df.to_csv(wl+'-omx.analysis.csv', sep=';', index=False)
+final_df.to_csv(wl+'-omx.analysis.csv', sep=',', index=False)
 
 # @TODO: P/E normailization should be in the reverse order
