@@ -13,6 +13,7 @@ def generateTOTP(totp_secret):
     totp_code = totp.now()
     return totp_code
 
+<<<<<<< HEAD
 def authenticate():
 
     # totp_code = generateTOTP(totp_secret)
@@ -32,6 +33,15 @@ def authenticate():
     })
 
     return avanza
+=======
+totp_code = generateTOTP('yourcode')
+
+avanza = Avanza({
+    'username': 'yourusername',
+    'password': 'yourpassword',
+    'totpSecret': 'yoursecret'
+})
+>>>>>>> 923cf94bbe49ce479ba904981e21e895d67ecebc
 
 def pp_json(json_dict):
     print(json.dumps(json_dict, indent=2))
