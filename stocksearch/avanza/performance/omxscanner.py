@@ -30,7 +30,7 @@ def authenticate():
         'password': password,
         'totpSecret': totp_secret
     })
-
+    print("Authenticating...")
     return avanza
 
 def pp_json(json_dict):
@@ -135,10 +135,10 @@ def normalize_basic(df):
 def analysis(avanza):
     
     watchlist = avanza.get_watchlists()
-    wl = "0 US stocks"
-    wl = "1 EU stocks"
-    wl = "2 SE high interest"
-    # wl = "3 SE good performance"
+    # wl = "0 US stocks"
+    # wl = "1 EU stocks"
+    # wl = "2 SE high interest"
+    wl = "3 SE good performance"
     # wl = "5 SE low interest"
     
     stock_ids = get_orderbooks_by_name(watchlist, wl)
@@ -164,30 +164,31 @@ def analysis(avanza):
 
 
 
-import asyncio
+# import asyncio
 
-def callback(data):
-    # Do something with the quotes data here
-    print(data)
+# def callback(data):
+#     # Do something with the quotes data here
+#     print(data)
 
-async def subscribe_to_channel(avanza: Avanza):
-    await avanza.subscribe_to_id(
-        ChannelType.QUOTES,
-        "19002", # OMX Stockholm 30
-        callback
-    )
+# async def subscribe_to_channel(avanza: Avanza):
+#     await avanza.subscribe_to_id(
+#         ChannelType.QUOTES,
+#         "19002", # OMX Stockholm 30
+#         callback
+#     )
 
 def main():
     
     avanza = authenticate()
+    print("Authenticated successfully.")
     # Analysis
-    # analysis(avanza)
+    analysis(avanza)
 
     # Real time data
-    asyncio.get_event_loop().run_until_complete(
-        subscribe_to_channel(avanza)
-    )
-    asyncio.get_event_loop().run_forever()
+    # asyncio.get_event_loop().run_until_complete(
+    #     subscribe_to_channel(avanza)
+    # )
+    # asyncio.get_event_loop().run_forever()
 
 if __name__ == "__main__":
     main()
