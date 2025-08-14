@@ -182,7 +182,12 @@ def logic_df(df):
         "Comm. / AVG Balance (%)": [commission_ratio],
         "Comm. / Profit (%)": [commission_to_profit]
     }
-    # pd.options.display.precision = 2  # Set display precision for all
+
+    for currency, stats in commission_stats.items():
+        if stats['Total'] > 0:
+            for stat_name, stat_value in stats.items():
+                results[f"Commission {currency} ({stat_name})"] = [round(stat_value, 2)]
+
     report_df = pd.DataFrame(results)
     
     return report_df
