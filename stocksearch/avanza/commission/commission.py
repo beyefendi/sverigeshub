@@ -4,7 +4,7 @@
 import pandas as pd
 import os
 
-CSV_FILE = "../data/transaktioner_2025-01-01_2025-08-08.csv"
+CSV_FILE = "../data/transaktioner_2025-01-01_2025-08-14.csv"
 STATIC_STARTING_BALANCE = 51971.58
 
 def get_starting_balance(filename, default_balance):
@@ -141,6 +141,17 @@ def logic_df(df):
     total_commission, max_commission, min_commission, avg_commission = get_commission_stats(trades)
     total_profit = round(closed_trades_df["Resultat"].apply(lambda x: float(str(x).replace(",", ".")) if pd.notna(x) else 0).sum(), 2)
     total_profit_avg_balance_ratio = round((total_profit / avg_balance * 100) if avg_balance > 0 else None, 2)
+    
+    if avg_balance > 0:
+        commission_ratio = round((total_commission / avg_balance) * 100, 2)
+    else:
+        commission_ratio = None
+    
+    if total_profit != 0:
+        commission_to_profit = round((total_commission / abs(total_profit)) * 100, 2)
+    else:
+        commission_to_profit = None
+
     currencies = ["SEK", "USD", "EUR", "DKK", "NOK"]
     commission_stats = get_commission_by_currency(trades, currencies)
 
@@ -148,26 +159,28 @@ def logic_df(df):
         "Starting balance": [STARTING_BALANCE],
         "Total top ups": [total_top_ups],
         "AVG balance": [avg_balance],
-        "Total traded shares": [distinct_shares],
+        "Total shares traded": [distinct_shares],
         "USD shares": [usd_shares],
         "SEK shares": [sek_shares],
         "Shares traded": [total_shares],
         "Total trades": [total_trades],
-        "BUY trades": [total_buy],
-        "SELL trades": [total_sell],
-        "OPEN trades": [open_trades],
-        "CLOSED trades": [closed_trades],
+        "BUY": [total_buy],
+        "SELL": [total_sell],
+        "OPEN": [open_trades],
+        "CLOSED": [closed_trades],
         "Total profit (SEK)": [total_profit],
         "Profit / AVG Balance (%)": [total_profit_avg_balance_ratio],
         "Top 5 Wins (%)": [top5_profits],
         "Top 5 Losses (%)": [top5_losses],
-        "Number of Wins": [num_gains],
-        "Number of Losses": [num_losses],
+        "Wins": [num_gains],
+        "Losses": [num_losses],
         "Win Ratio (%)": [gain_ratio],
         "Total commission (SEK)": [total_commission],
         "Max commission (SEK)": [max_commission],
         "Min commission (SEK)": [min_commission],
         "Avg commission (SEK)": [avg_commission],
+        "Comm. / AVG Balance (%)": [commission_ratio],
+        "Comm. / Profit (%)": [commission_to_profit]
     }
     # pd.options.display.precision = 2  # Set display precision for all
     report_df = pd.DataFrame(results)
@@ -178,7 +191,7 @@ def logic_print(df):
     
     total_top_ups, avg_balance = parse_top_ups(df, STARTING_BALANCE)
     trades = df[df["Typ av transaktion"].isin(["Köp", "Sälj"])]
-    total_trades, total_buy, total_sell, distinct_shares, usd_shares, sek_shares = get_trade_stats(trades)
+    total_trades, total_buy, total_sell, total_shares, distinct_shares, usd_shares, sek_shares = get_trade_stats(trades)
     closed_trades_df = get_closed_trades(trades)
     closed_trades = len(closed_trades_df)
     open_trades = count_open_positions(trades)
@@ -209,15 +222,16 @@ def logic_print(df):
     print(f"Total top ups\t\t: {total_top_ups:.2f}")
     print(f"AVG balance (weighted)\t: {avg_balance:.2f}")
     print("-" * 50)
-    print(f"Total traded shares\t: {distinct_shares}")
+    print(f"Total shares traded\t: {distinct_shares}")
     print(f"USD shares\t\t: {usd_shares}")
     print(f"SEK shares\t\t: {sek_shares}")
+    print(f"Shares traded\t\t: {', '.join(total_shares)}")
     print("-" * 50)
     print(f"Total trades\t\t: {total_trades}")
-    print(f"BUY trades\t\t: {total_buy}")
-    print(f"SELL trades\t\t: {total_sell}")
-    print(f"OPEN trades\t\t: {open_trades}")
-    print(f"CLOSED trades\t\t: {closed_trades}")
+    print(f"BUY\t\t: {total_buy}")
+    print(f"SELL\t\t: {total_sell}")
+    print(f"OPEN\t\t: {open_trades}")
+    print(f"CLOSED\t\t: {closed_trades}")
     print("-" * 50)
     print("!!! Profits and losses contain overheads (commission and currency conversion spread (at least 0.25%)) !!!")
     print(f"Total profit\t\t: {total_profit:.2f} SEK") # from closed trades
@@ -228,9 +242,9 @@ def logic_print(df):
         print("Profit / AVG Balance: N/A (average balance is zero)")
     print(f"Top 5 Wins (%)\t\t:", ", ".join(f"{g:.2f}" for g in top5_profits))
     print(f"Top 5 Losses (%)\t:", ", ".join(f"{l:.2f}" for l in top5_losses))
-    print(f"Number of Wins\t\t: {num_gains}")
-    print(f"Number of Losses\t: {num_losses}")
-    print(f"Wins / (Wins + Losses)\t: {gain_ratio:.2f}%")
+    print(f"Wins\t\t: {num_gains}")
+    print(f"Losses\t: {num_losses}")
+    print(f"Win Ratio\t: {gain_ratio:.2f}%")
     print("-" * 50)
     print("!!! Commission does not contain currency conversion spread (at least 0.25%) !!!")
     print(f"Total commission\t: {total_commission:.2f} SEK")
@@ -255,7 +269,7 @@ def logic_print(df):
 
 if __name__ == "__main__":
     df = load_data(CSV_FILE)
-    logic_df(df)
+    logic_print(df)
 
 """
 def test_profit_calculation():
