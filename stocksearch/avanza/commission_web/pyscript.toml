@@ -1,10 +1,10 @@
 name = "avanza_commission"
 version = "0.1"
-description = "Avanza Commission Analysis"
+description = "AVANZA Trade Performance Analysis"
 author = "Emre Süren"
 author_email = "siberkartal@gmail.com"
 
-packages = ["pandas", "sqlite3"]
+packages = ["pandas"]
 [files]
 "../commission/commission.py" = "commission.py"
-"../logger/upload_logger.py" = "upload_logger.py"
+

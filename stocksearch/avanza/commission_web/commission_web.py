@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pyscript import when 
-from pyscript import display
 from js import document
 from js import console
 from io import StringIO
