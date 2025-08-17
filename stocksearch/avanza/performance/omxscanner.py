@@ -135,11 +135,12 @@ def normalize_basic(df):
 def analysis(avanza):
     
     watchlist = avanza.get_watchlists()
-    # wl = "0 US stocks"
-    # wl = "1 EU stocks"
-    # wl = "2 SE high interest"
-    wl = "3 SE good performance"
-    # wl = "5 SE low interest"
+    # wl = "0 US"
+    # wl = "1 EU"
+    wl = "2 SE Profiting"
+    # wl = "3 SE Losing"
+    # wl = "3 SE Others"
+    # wl = "4 US Potential"
     
     stock_ids = get_orderbooks_by_name(watchlist, wl)
     # print(stock_ids) # For debugging
